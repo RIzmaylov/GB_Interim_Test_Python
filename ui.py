@@ -29,8 +29,7 @@ def interface():
             case '3':
                 search_note()
             case '4':
-                print()
-                # copying_contact()
+                del_note()
             case '5':
                 show_notebook()
             case '6':

@@ -1,4 +1,5 @@
 import csv
+from date_create import create_changing_note
 
 def add_note(note):
     with open('notebook.csv', 'a', encoding = 'utf-8') as file:
@@ -43,34 +44,81 @@ def show_notebook():
                 date = row[0].split('-')
                 print(' '.join(row))
 
-def search_note():
-    search = str(input('Введите название искомой заметки: '))
-
+def index_of_name(search):
     with open('notebook.csv', 'r', encoding = 'utf-8') as file:
-        reader = csv.reader(file, delimiter=',')
-
-        for row in reader:
-            if row[1].strip() == search:
-                print(' '.join(row))
-
-def change_note():
-    search = str(input('Введите название заметки для изменения: '))
-
-    with open('notebook.csv', 'r+', encoding = 'utf-8') as file:
-        notes = file.read().split(';')
+        notes = file.read().split(';\n')
 
         index = -1
         for row in notes:
             note = row.split(',')
-            print(' '.join(note))
-            if note[1].strip() == search:
+            if len(note) == 3 and note[1].strip() == search:
                 index = notes.index(row)
+        return index
+
+def search_note():
+    search = str(input('Введите название искомой заметки: '))
+
+    with open('notebook.csv', 'r', encoding = 'utf-8') as file:
+        notes = file.read().split(';\n')
+        index = index_of_name(search)
         if index == -1:
-            print('Нет заметки с таким названием')
+            print('Нет заметки с таким названием\n')
             return
-        print('Старая заметка: ')
-        print(notes[index])
-        note_body = input('Введите новое тело заметки: ')
-        note = notes[index].split(',')
-        note[2] = note_body
-        notes[index] = note
+        print('Ваша заметка:')
+        print(notes[index] + '\n')
+
+def change_note():
+    search = str(input('Введите название заметки для изменения: '))
+
+    file = open('notebook.csv', 'r+', encoding = 'utf-8')
+    notes = file.read().split(';\n')
+
+    index = index_of_name(search)
+    if index == -1:
+        print('Нет заметки с таким названием\n')
+        return
+    print('Старая заметка: ')
+    print(notes[index] + '\n')
+    note_body = input('Введите новое тело заметки: ')
+    notes[index] = create_changing_note(notes[index], note_body)
+    print('Заметка изменена: ')
+    print(notes[index] + '\n')
+
+    file = open('notebook.csv', 'w', encoding = 'utf-8')
+    file.writelines(f'{item};\n' for item in notes if len(item) > 1)
+
+def clear_file():
+    with open('notebook.csv', 'w', encoding = 'utf-8') as file:
+        pass
+
+def del_note():
+    search = str(input('Введите название заметки для удаления: '))
+
+    file = open('notebook.csv', 'r+', encoding = 'utf-8')
+    notes = file.read().split(';\n')
+    index = index_of_name(search)
+    if index == -1:
+        print('Нет заметки с таким названием\n')
+        return
+    print('Следующая заметка будет удалена: ')
+    print(notes[index])
+    req = input('Удалить? (Y/N): ')
+    if (req == 'Y' or req == 'y'):
+        file = open('notebook.csv', 'w', encoding = 'utf-8')
+        file.writelines(f'{item};\n' for item in notes if len(item) > 1 and notes.index(item) != index)
+
+    # with open('notebook.csv', 'r+', encoding = 'utf-8') as file:
+    #     notes = file.read().split(';\n')
+
+    #     index = index_of_name(search)
+    #     if index == -1:
+    #         print('Нет заметки с таким названием\n')
+    #         return
+
+    #     print('Следующая заметка будет удалена: ')
+    #     print(notes[index])
+    #     req = input('Удалить? (Y/N): ')
+    #     if (req == 'Y' or req == 'y'):
+    #         notes.pop(index)
+    #         clear_file()
+    #         file.writelines(f'{item};\n' for item in notes if len(item) > 1)
